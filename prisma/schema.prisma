@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model feedback {
+  feedback_id     String @id @default(uuid()) @db.Uuid
+  title           String
+  description     String
+  feedback_status status @default(suggestion)
+  upvote_count    Int @default(0) 
+}
+
+enum status {
+  suggestion
+  planned
+  in_progress @map("in-progress")
+  live
+}
