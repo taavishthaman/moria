@@ -1,11 +1,12 @@
 const express = require("express");
 const feedbackController = require("../controllers/feedbackController");
+const authController = require("../controllers/authController");
 
 const router = express.Router();
 
 router
   .route("/")
-  .get(feedbackController.getAllFeedbacks)
+  .get(authController.protect, feedbackController.getAllFeedbacks)
   .post(feedbackController.createFeedback);
 
 router

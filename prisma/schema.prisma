@@ -9,10 +9,22 @@ datasource db {
 
 model feedback {
   feedback_id     String @id @default(uuid()) @db.Uuid
-  title           String
+  title           String  @unique
   description     String
   feedback_status status @default(suggestion)
   upvote_count    Int @default(0) 
+}
+
+model user {
+  user_id                    String @id @default(uuid()) @db.Uuid
+  name                       String
+  username                   String  @unique
+  email                      String  @unique
+  password                   String
+  password_changed_at        DateTime?
+  user_role                  role @default(user)
+  password_reset_token       String?
+  password_reset_expires     DateTime?
 }
 
 enum status {
@@ -20,4 +32,9 @@ enum status {
   planned
   in_progress @map("in-progress")
   live
+}
+
+enum role {
+  user
+  admin
 }

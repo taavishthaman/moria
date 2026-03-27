@@ -1,7 +1,8 @@
 const prisma = require("../lib/prisma");
 const APIFeatures = require("../utils/apiFeatures");
+const catchAsync = require("../utils/catchAsync");
 
-exports.getAllFeedbacks = async (req, res, next) => {
+exports.getAllFeedbacks = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(prisma.feedback, req.query, {})
     .filter()
     .sort()
@@ -16,9 +17,9 @@ exports.getAllFeedbacks = async (req, res, next) => {
       feedbacks,
     },
   });
-};
+});
 
-exports.getFeedback = async (req, res, next) => {
+exports.getFeedback = catchAsync(async (req, res, next) => {
   const feedback = await prisma.feedback.findUnique({
     where: {
       feedback_id: req.params.id,
@@ -26,7 +27,7 @@ exports.getFeedback = async (req, res, next) => {
   });
 
   if (!feedback) {
-    res.status(404).json({
+    return res.status(404).json({
       status: "fail",
       message: "No feedback found with that ID",
     });
@@ -38,9 +39,9 @@ exports.getFeedback = async (req, res, next) => {
       feedback,
     },
   });
-};
+});
 
-exports.createFeedback = async (req, res, next) => {
+exports.createFeedback = catchAsync(async (req, res, next) => {
   const feedback = await prisma.feedback.create({ data: req.body });
 
   res.status(201).json({
@@ -49,9 +50,9 @@ exports.createFeedback = async (req, res, next) => {
       feedback,
     },
   });
-};
+});
 
-exports.updateFeedback = async (req, res, next) => {
+exports.updateFeedback = catchAsync(async (req, res, next) => {
   const newFeedback = await prisma.feedback.update({
     where: {
       feedback_id: req.params.id,
@@ -60,7 +61,7 @@ exports.updateFeedback = async (req, res, next) => {
   });
 
   if (!newFeedback) {
-    res.status(404).json({
+    return res.status(404).json({
       status: "fail",
       message: "No feedback found with that ID",
     });
@@ -72,9 +73,9 @@ exports.updateFeedback = async (req, res, next) => {
       feedback: newFeedback,
     },
   });
-};
+});
 
-exports.deleteFeedback = async (req, res, next) => {
+exports.deleteFeedback = catchAsync(async (req, res, next) => {
   await prisma.feedback.delete({
     where: {
       feedback_id: req.params.id,
@@ -85,4 +86,4 @@ exports.deleteFeedback = async (req, res, next) => {
     status: "success",
     data: null,
   });
-};
+});
