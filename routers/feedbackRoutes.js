@@ -4,9 +4,11 @@ const authController = require("../controllers/authController");
 
 const router = express.Router();
 
+router.use(authController.protect);
+
 router
   .route("/")
-  .get(authController.protect, feedbackController.getAllFeedbacks)
+  .get(feedbackController.getAllFeedbacks)
   .post(feedbackController.createFeedback);
 
 router
@@ -14,5 +16,15 @@ router
   .get(feedbackController.getFeedback)
   .patch(feedbackController.updateFeedback)
   .delete(feedbackController.deleteFeedback);
+
+router
+  .route("/:id/comment")
+  .get(feedbackController.getAllComments)
+  .post(feedbackController.createComment);
+
+router
+  .route("/:id/upvote")
+  .post(feedbackController.postUpvote)
+  .delete(feedbackController.deleteUpvote);
 
 module.exports = router;

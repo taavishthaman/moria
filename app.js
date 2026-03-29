@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const xss = require("xss-clean");
 const feedbackRouter = require("./routers/feedbackRoutes");
 const userRouter = require("./routers/userRoutes");
+const categoryRouter = require("./routers/catgeoryRoutes");
 const globalErrorHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 
@@ -39,13 +40,14 @@ app.use(
 );
 
 //Data sanitization against noSQL query injection
-app.use(mongoSanitize());
+//app.use(mongoSanitize());
 
 // Data sanitization against XSS attacks
-app.use(xss());
+//app.use(xss());
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/feedback", feedbackRouter);
+app.use("/api/v1/category", categoryRouter);
 
 app.all(/(.*)/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

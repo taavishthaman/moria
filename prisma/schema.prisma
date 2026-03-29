@@ -8,11 +8,22 @@ datasource db {
 }
 
 model feedback {
-  feedback_id     String @id @default(uuid()) @db.Uuid
-  title           String  @unique
-  description     String
-  feedback_status status @default(suggestion)
-  upvote_count    Int @default(0) 
+  feedback_id         String @id @default(uuid()) @db.Uuid
+  title               String  @unique
+  description         String
+  feedback_status     status @default(suggestion)
+  upvote_count        Int @default(0)
+  comment_count       Int @default(0)
+
+  user                user @relation(fields: [user_id], references: [user_id])
+  user_id             String @db.Uuid
+
+  comments            comment[]
+
+  category            category @relation(fields: [category_id], references: [category_id])
+  category_id         String @db.Uuid
+
+  upvotes             upvote[]
 }
 
 model user {
@@ -25,6 +36,40 @@ model user {
   user_role                  role @default(user)
   password_reset_token       String?
   password_reset_expires     DateTime?
+  feedbacks                  feedback[]
+  comments                   comment[]
+  upvotes                    upvote[]
+}
+
+model comment {
+  comment_id            String @id @default(uuid()) @db.Uuid
+  comment               String
+
+  user                  user @relation(fields: [user_id], references: [user_id])
+  user_id               String @db.Uuid
+
+  feedback              feedback @relation(fields: [feedback_id], references: [feedback_id])
+  feedback_id           String @db.Uuid
+
+  parent_comment_id     String? @db.Uuid
+  parent_comment        comment? @relation("CommentReplies", fields: [parent_comment_id], references: [comment_id])
+  comments              comment[] @relation("CommentReplies")
+}
+
+model category {
+  category_id       String @id @default(uuid()) @db.Uuid
+  category_name     String
+  feedbacks         feedback[]
+}
+
+model upvote {
+  feedback        feedback @relation(fields: [feedback_id], references: [feedback_id])
+  feedback_id     String @db.Uuid
+
+  user            user @relation(fields: [user_id], references: [user_id])
+  user_id         String @db.Uuid
+
+  @@id(name: "upvote_id", [feedback_id, user_id])
 }
 
 enum status {
