@@ -1,13 +1,13 @@
 const getSubstringBetween = (str, startChar, endChar) => {
   const startIndex = str.indexOf(startChar);
   if (startIndex == -1) {
-    return null;
+    return { operator: null, property: null };
   }
 
   const endIndex = str.indexOf(endChar, startIndex + 1);
 
   if (endIndex == -1) {
-    return null;
+    return { operator: null, property: null };
   }
 
   return {
@@ -36,9 +36,13 @@ class APIFeatures {
     Object.keys(queryObj).forEach((el) => {
       const { operator, property } = getSubstringBetween(el, "[", "]");
 
-      this.newQueryObj["where"][property] = {
-        [operator]: queryObj[el] * 1,
-      };
+      if (operator !== null && property !== null) {
+        this.newQueryObj["where"][property] = {
+          [operator]: queryObj[el] * 1,
+        };
+      } else {
+        this.newQueryObj["where"][el] = queryObj[el];
+      }
     });
 
     this.query = this.query.findMany(this.newQueryObj);
@@ -51,12 +55,21 @@ class APIFeatures {
       const sortBy = this.queryString.sort.split(",");
 
       sortBy.forEach((el) => {
-        this.newQueryObj["orderBy"] = {
-          [el]: "asc",
-        };
+        if (el[0] === "-") {
+          this.newQueryObj["orderBy"] = {
+            [el.substring(1)]: "desc",
+          };
+        } else {
+          this.newQueryObj["orderBy"] = {
+            [el]: "asc",
+          };
+        }
       });
     } else {
       //TODO: Generic Case!
+      this.newQueryObj["orderBy"] = {
+        feedback_id: "asc",
+      };
     }
 
     return this;

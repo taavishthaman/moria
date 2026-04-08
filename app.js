@@ -5,6 +5,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const cors = require("cors");
 const feedbackRouter = require("./routers/feedbackRoutes");
 const userRouter = require("./routers/userRoutes");
 const categoryRouter = require("./routers/catgeoryRoutes");
@@ -14,6 +15,8 @@ const AppError = require("./utils/appError");
 dotenv.config({ path: "./.env" });
 
 const app = express();
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 //1) GLOBAL MIDDLEWARES
 app.use(helmet());

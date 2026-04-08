@@ -161,6 +161,44 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.headers.authorization) {
+    const decoded = await promisify(jwt.verify)(
+      req.headers.authorization.split(" ")[1],
+      process.env.JWT_SECRET,
+    );
+
+    const currentUser = await prisma.user.findUnique({
+      where: {
+        user_id: decoded.id,
+      },
+    });
+
+    if (!currentUser) {
+      return next(
+        new AppError("The user belonging to this token no longer exists!", 401),
+      );
+    } else {
+      const currentUserCopy = {
+        ...currentUser,
+        password: null,
+        password_changed_at: null,
+        password_reset_token: null,
+        password_reset_expires: null,
+      };
+      res.locals.user = currentUserCopy;
+      res.status(200).json({
+        status: "success",
+        data: {
+          currentUserCopy,
+        },
+      });
+    }
+  } else {
+    return next(new AppError("JWT token is missing or invalid", 401));
+  }
+});
+
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     console.log(req.user);

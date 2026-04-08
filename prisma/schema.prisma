@@ -28,8 +28,8 @@ model feedback {
 
 model user {
   user_id                    String @id @default(uuid()) @db.Uuid
-  name                       String
-  username                   String  @unique
+  name                       String?
+  username                   String?  @unique
   email                      String  @unique
   password                   String
   password_changed_at        DateTime?
@@ -47,6 +47,9 @@ model comment {
 
   user                  user @relation(fields: [user_id], references: [user_id])
   user_id               String @db.Uuid
+  name                  String
+  username              String?
+  email                 String
 
   feedback              feedback @relation(fields: [feedback_id], references: [feedback_id])
   feedback_id           String @db.Uuid

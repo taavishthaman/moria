@@ -6,6 +6,7 @@ exports.getAllCategories = catchAsync(async (req, res, next) => {
   const categories = await prisma.category.findMany();
 
   res.status(200).json({
+    status: "success",
     data: {
       categories,
     },

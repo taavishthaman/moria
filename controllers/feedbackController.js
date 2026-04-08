@@ -10,11 +10,26 @@ exports.getAllFeedbacks = catchAsync(async (req, res, next) => {
     .paginate();
   const feedbacks = await features.query;
 
+  const feedbackIds = feedbacks.map((f) => f.feedback_id);
+  const userUpvotes = await prisma.upvote.findMany({
+    where: {
+      user_id: req.user.user_id,
+      feedback_id: { in: feedbackIds }, // Batch query
+    },
+  });
+
+  const upvotedIds = new Set(userUpvotes.map((u) => u.feedback_id));
+
+  const feedbacksWithUpvoteStatus = feedbacks.map((feedback) => ({
+    ...feedback,
+    has_user_upvoted: upvotedIds.has(feedback.feedback_id),
+  }));
+
   res.status(200).json({
     status: "success",
     results: feedbacks.length,
     data: {
-      feedbacks,
+      feedbacks: feedbacksWithUpvoteStatus,
     },
   });
 });
@@ -33,10 +48,21 @@ exports.getFeedback = catchAsync(async (req, res, next) => {
     });
   }
 
+  const userUpvotes = await prisma.upvote.findFirst({
+    where: {
+      user_id: req.user.user_id,
+      feedback_id: req.params.id,
+    },
+  });
+
+  const feedbacksWithUpvoteStatus = [
+    { ...feedback, has_user_upvoted: userUpvotes ? true : false },
+  ];
+
   res.status(200).json({
     status: "success",
     data: {
-      feedback,
+      feedback: feedbacksWithUpvoteStatus,
     },
   });
 });
@@ -58,11 +84,21 @@ exports.createFeedback = catchAsync(async (req, res, next) => {
 });
 
 exports.updateFeedback = catchAsync(async (req, res, next) => {
+  const { category_id, ...restData } = req.body;
+
+  const updateData = {
+    ...restData,
+    ...(category_id && {
+      category: {
+        connect: { category_id },
+      },
+    }),
+  };
   const newFeedback = await prisma.feedback.update({
     where: {
       feedback_id: req.params.id,
     },
-    data: req.body,
+    data: updateData,
   });
 
   if (!newFeedback) {
@@ -73,7 +109,7 @@ exports.updateFeedback = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json({
-    message: "success",
+    status: "success",
     data: {
       feedback: newFeedback,
     },
@@ -87,7 +123,7 @@ exports.deleteFeedback = catchAsync(async (req, res, next) => {
     },
   });
 
-  res.status(204).json({
+  res.status(200).json({
     status: "success",
     data: null,
   });
@@ -120,6 +156,9 @@ exports.createComment = catchAsync(async (req, res, next) => {
       feedback_id: feedbackId,
       user_id: req.user.user_id,
       parent_comment_id: parentId || null,
+      name: req.user.name,
+      username: req.user.username || null,
+      email: req.user.email,
     },
   });
 
@@ -136,6 +175,7 @@ exports.createComment = catchAsync(async (req, res, next) => {
   });
 
   res.status(200).json({
+    status: "success",
     data: {
       comment: newComment,
     },
@@ -198,7 +238,7 @@ exports.deleteUpvote = catchAsync(async (req, res, next) => {
     },
   });
 
-  res.status(204).json({
+  res.status(200).json({
     status: "success",
     data: null,
   });

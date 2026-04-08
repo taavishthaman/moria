@@ -4,12 +4,16 @@ const authController = require("../controllers/authController");
 
 const router = express.Router();
 
-router.use(authController.protect);
-
 router
   .route("/")
   .get(categoryController.getAllCategories)
-  .post(authController.restrictTo("admin"), categoryController.createCategory);
+  .post(
+    authController.protect,
+    authController.restrictTo("admin"),
+    categoryController.createCategory,
+  );
+
+router.use(authController.protect);
 
 router
   .route("/:id")
