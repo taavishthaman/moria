@@ -147,39 +147,44 @@ exports.getAllComments = catchAsync(async (req, res, next) => {
 });
 
 exports.createComment = catchAsync(async (req, res, next) => {
-  const { parentId, comment } = req.body;
-  const feedbackId = req.params.id;
+  try {
+    const { parentId, comment } = req.body;
+    const feedbackId = req.params.id;
 
-  const newComment = await prisma.comment.create({
-    data: {
-      comment,
-      feedback_id: feedbackId,
-      user_id: req.user.user_id,
-      parent_comment_id: parentId || null,
-      name: req.user.name || null,
-      username: req.user.username || null,
-      email: req.user.email,
-    },
-  });
-
-  //Also increment the comment count by 1, because we need fast acceess to it
-  await prisma.feedback.update({
-    where: {
-      feedback_id: feedbackId,
-    },
-    data: {
-      comment_count: {
-        increment: 1,
+    const newComment = await prisma.comment.create({
+      data: {
+        comment,
+        feedback_id: feedbackId,
+        user_id: req.user.user_id,
+        parent_comment_id: parentId || null,
+        name: req.user.name || null,
+        username: req.user.username || null,
+        email: req.user.email,
       },
-    },
-  });
+    });
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      comment: newComment,
-    },
-  });
+    //Also increment the comment count by 1, because we need fast acceess to it
+    await prisma.feedback.update({
+      where: {
+        feedback_id: feedbackId,
+      },
+      data: {
+        comment_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        comment: newComment,
+      },
+    });
+  } catch (error) {
+    console.error("Comment creation error:", error); // ADD THIS
+    throw error;
+  }
 });
 
 exports.postUpvote = catchAsync(async (req, res, next) => {
