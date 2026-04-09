@@ -16,7 +16,15 @@ dotenv.config({ path: "./.env" });
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://ereborproductfeedback.netlify.app",
+    ],
+    credentials: true,
+  }),
+);
 
 //1) GLOBAL MIDDLEWARES
 app.use(helmet());
