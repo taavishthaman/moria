@@ -156,7 +156,7 @@ exports.createComment = catchAsync(async (req, res, next) => {
       feedback_id: feedbackId,
       user_id: req.user.user_id,
       parent_comment_id: parentId || null,
-      name: req.user.name,
+      name: req.user.name || null,
       username: req.user.username || null,
       email: req.user.email,
     },
